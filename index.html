@@ -1,0 +1,544 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Happy Monthsary, My Love! ❤️</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Canvas Confetti for Celebration -->
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    <!-- Google Fonts: Fredoka & Poppins -->
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        love: {
+                            50: '#fff1f2',
+                            100: '#ffe4e6',
+                            200: '#fecdd3',
+                            300: '#fda4af',
+                            400: '#fb7185',
+                            500: '#f43f5e',
+                            600: '#e11d48',
+                            700: '#be123c',
+                        }
+                    },
+                    fontFamily: {
+                        fredoka: ['Fredoka', 'sans-serif'],
+                        poppins: ['Poppins', 'sans-serif'],
+                    },
+                    animation: {
+                        'float-slow': 'float 4s ease-in-out infinite',
+                        'pulse-heart': 'pulseHeart 1.5s infinite',
+                        'shake': 'shake 0.5s ease-in-out',
+                    },
+                    keyframes: {
+                        float: {
+                            '0%, 100%': { transform: 'translateY(0px)' },
+                            '50%': { transform: 'translateY(-12px)' },
+                        },
+                        pulseHeart: {
+                            '0%, 100%': { transform: 'scale(1)' },
+                            '50%': { transform: 'scale(1.15)' },
+                        },
+                        shake: {
+                            '0%, 100%': { transform: 'translateX(0)' },
+                            '20%, 60%': { transform: 'translateX(-10px)' },
+                            '40%, 80%': { transform: 'translateX(10px)' },
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: linear-gradient(135deg, #fff0f3 0%, #ffccd5 50%, #ffb3c1 100%);
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        /* Floating background hearts style */
+        .heart-particle {
+            position: absolute;
+            pointer-events: none;
+            animation: floatUp 6s linear infinite;
+            opacity: 0.6;
+        }
+
+        @keyframes floatUp {
+            0% {
+                transform: translateY(100vh) rotate(0deg) scale(0.8);
+                opacity: 0.8;
+            }
+            100% {
+                transform: translateY(-10vh) rotate(360deg) scale(1.2);
+                opacity: 0;
+            }
+        }
+
+        /* Custom Glassmorphism card */
+        .glass-card {
+            background: rgba(255, 255, 255, 0.88);
+            backdrop-filter: blur(12px);
+            border: 2px solid rgba(255, 255, 255, 0.9);
+            box-shadow: 0 20px 40px rgba(244, 63, 94, 0.15);
+        }
+
+        /* Interactive Date Option Card Selection */
+        .date-card {
+            transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+        .date-card:hover {
+            transform: translateY(-6px) scale(1.02);
+        }
+        .date-card.selected {
+            border-color: #f43f5e;
+            background-color: #fff1f2;
+            box-shadow: 0 12px 25px rgba(244, 63, 94, 0.25);
+            transform: translateY(-4px) scale(1.03);
+        }
+    </style>
+</head>
+<body class="flex items-center justify-center min-h-screen p-4 relative font-poppins">
+
+    <!-- Ambient Floating Hearts Background -->
+    <div id="heart-container" class="fixed inset-0 pointer-events-none z-0"></div>
+
+    <!-- MAIN CONTAINER -->
+    <main class="w-full max-w-md md:max-w-xl z-10 my-auto">
+
+        <!-- ========================================== -->
+        <!-- STEP 1: ANNIVERSARY LOCK SCREEN            -->
+        <!-- ========================================== -->
+        <section id="step-1" class="glass-card rounded-3xl p-6 md:p-10 text-center transition-all duration-500 transform">
+            <div class="inline-block p-4 bg-love-100 rounded-full mb-4 animate-float-slow">
+                <span class="text-5xl">🔐</span>
+            </div>
+            
+            <h1 class="font-fredoka text-2xl md:text-3xl text-love-700 font-bold mb-2">
+                Hello My Beautiful Lovie! 💕
+            </h1>
+            <p class="text-gray-600 text-sm md:text-base mb-6">
+                Before you unlock your surprise, enter our special passcode... 
+                <br><span class="text-xs text-love-500 font-medium">(When did we officially become a couple? 😉)</span>
+            </p>
+
+            <!-- Date Input Form -->
+            <div class="space-y-4 mb-6">
+                <div class="flex justify-center items-center gap-2">
+                    <input type="date" id="anniversary-date" onchange="checkDateInput()" onkeyup="checkDateInput()"
+                           class="w-full px-4 py-3 text-center text-gray-700 bg-white/90 border-2 border-love-200 rounded-2xl focus:outline-none focus:border-love-500 text-lg font-semibold shadow-inner transition-all">
+                </div>
+
+                <!-- Error / Hint Message -->
+                <div id="error-msg" class="hidden text-love-600 text-sm font-semibold bg-love-100 py-2 px-4 rounded-xl animate-shake">
+                    Oops! Wrong date Lovie 😅 Try again!
+                </div>
+            </div>
+
+            <!-- Lock / Unlock Button (Shows Confirm when date is correct) -->
+            <button id="unlock-btn" onclick="verifyDate()" disabled
+                    class="w-full py-4 bg-gray-300 text-gray-500 font-fredoka text-xl rounded-2xl shadow transition-all duration-300 cursor-not-allowed flex items-center justify-center gap-2">
+                <span id="btn-text">Confirm Date</span>
+                <span id="btn-icon">🔒</span>
+            </button>
+        </section>
+
+
+        <!-- ========================================== -->
+        <!-- STEP 2: PROPOSAL PAGE (WILL YOU DATE ME?)  -->
+        <!-- ========================================== -->
+        <section id="step-2" class="hidden glass-card rounded-3xl p-6 md:p-10 text-center transition-all duration-500 relative min-h-[420px] flex flex-col items-center justify-between">
+            <div class="w-full">
+                <!-- Animated Icon Container -->
+                <div class="inline-block p-4 bg-love-100 rounded-full mb-3 animate-pulse-heart">
+                    <span class="text-6xl">🧸</span>
+                </div>
+
+                <h2 class="font-fredoka text-2xl md:text-3xl text-love-700 font-bold mb-2">
+                    Happy 14th Monthsary, Lovie! 🌹
+                </h2>
+                <p class="text-gray-600 text-base md:text-lg mb-6 font-medium">
+                    Will you go on a date with me for our monthsary, Lovie? 👉👈
+                </p>
+            </div>
+
+            <!-- Evasive Buttons Container -->
+            <div id="btn-container" class="w-full relative min-h-[140px] flex flex-wrap items-center justify-center gap-4 py-4">
+                <button id="yes-btn" onclick="acceptProposal()" 
+                        class="px-8 py-4 bg-gradient-to-r from-emerald-400 to-green-500 hover:from-emerald-500 hover:to-green-600 text-white font-fredoka text-xl rounded-2xl shadow-lg transform transition-all duration-200 hover:scale-110 z-20">
+                    YES, OF COURSE! 💖
+                </button>
+
+                <button id="no-btn" onclick="moveNoButton()"
+                        class="px-8 py-4 bg-gray-200 hover:bg-gray-300 text-gray-700 font-fredoka text-xl rounded-2xl shadow transition-all duration-200 z-20">
+                    No 😜
+                </button>
+            </div>
+            
+            <p id="tease-text" class="text-xs text-love-500 font-medium h-4 mt-2">
+                <!-- Dynamic playful text -->
+            </p>
+        </section>
+
+
+        <!-- ========================================== -->
+        <!-- STEP 3: DATE DESTINATION SELECTOR          -->
+        <!-- ========================================== -->
+        <section id="step-3" class="hidden glass-card rounded-3xl p-6 md:p-8 text-center transition-all duration-500">
+            <div class="inline-block p-3 bg-love-100 rounded-full mb-2">
+                <span class="text-4xl">✨</span>
+            </div>
+
+            <h2 class="font-fredoka text-2xl md:text-3xl text-love-700 font-bold mb-1">
+                Yaaay! Where Are We Going? 🥳
+            </h2>
+            <p class="text-gray-600 text-sm mb-6">
+                Pick your dream monthsary date option below!
+            </p>
+
+            <!-- Date Options Grid -->
+            <div class="grid grid-cols-2 gap-3 md:gap-4 mb-6">
+                <!-- Option 1: Cinema -->
+                <div onclick="selectOption(this, 'Cinema / Movie Date 🍿🎬')" 
+                     class="date-card bg-white p-4 rounded-2xl border-2 border-transparent cursor-pointer text-center flex flex-col items-center justify-center">
+                    <span class="text-4xl mb-2">🍿</span>
+                    <h3 class="font-fredoka text-gray-800 font-semibold text-base">Cinema Date</h3>
+                    <p class="text-xs text-gray-500 mt-1">Movies & Popcorn</p>
+                </div>
+
+                <!-- Option 2: Fast Food -->
+                <div onclick="selectOption(this, 'Fast Food Date 🍔🍟')" 
+                     class="date-card bg-white p-4 rounded-2xl border-2 border-transparent cursor-pointer text-center flex flex-col items-center justify-center">
+                    <span class="text-4xl mb-2">🍔</span>
+                    <h3 class="font-fredoka text-gray-800 font-semibold text-base">Fast Food Date</h3>
+                    <p class="text-xs text-gray-500 mt-1">Burgers, Fries & Sundae</p>
+                </div>
+
+                <!-- Option 3: Coffee Date -->
+                <div onclick="selectOption(this, 'Coffee Date ☕🍰')" 
+                     class="date-card bg-white p-4 rounded-2xl border-2 border-transparent cursor-pointer text-center flex flex-col items-center justify-center">
+                    <span class="text-4xl mb-2">☕</span>
+                    <h3 class="font-fredoka text-gray-800 font-semibold text-base">Coffee Date</h3>
+                    <p class="text-xs text-gray-500 mt-1">Coffee, Cakes & Talks</p>
+                </div>
+
+                <!-- Option 4: Street Food Date -->
+                <div onclick="selectOption(this, 'Street Food Date 🍢🥤')" 
+                     class="date-card bg-white p-4 rounded-2xl border-2 border-transparent cursor-pointer text-center flex flex-col items-center justify-center">
+                    <span class="text-4xl mb-2">🍢</span>
+                    <h3 class="font-fredoka text-gray-800 font-semibold text-base">Street Food</h3>
+                    <p class="text-xs text-gray-500 mt-1">Snacks, Skewers & Drinks</p>
+                </div>
+            </div>
+
+            <!-- Confirm Date Selection Button -->
+            <button id="lock-date-btn" onclick="showSummary()" disabled
+                    class="w-full py-4 bg-gray-300 text-gray-500 font-fredoka text-lg rounded-2xl shadow transition-all duration-300 cursor-not-allowed flex items-center justify-center gap-2">
+                <span>Lock In Our Date!</span>
+                <span>🔒</span>
+            </button>
+        </section>
+
+        <!-- ========================================== -->
+        <!-- FINAL STEP: SUMMARY & SWEET NOTE POPUP    -->
+        <!-- ========================================== -->
+        <section id="step-4" class="hidden glass-card rounded-3xl p-6 md:p-8 text-center transition-all duration-500">
+            <div class="inline-block p-4 bg-love-100 rounded-full mb-3 animate-float-slow">
+                <span class="text-5xl">💌</span>
+            </div>
+
+            <h2 class="font-fredoka text-2xl md:text-3xl text-love-700 font-bold mb-2">
+                It's a Date, Lovie! 💕
+            </h2>
+            
+            <div class="bg-white/90 rounded-2xl p-4 border border-love-100 mb-5 shadow-sm text-left">
+                <p class="text-xs font-semibold text-love-500 uppercase tracking-wider mb-1">Our Selected Destination:</p>
+                <p id="summary-choice" class="font-fredoka text-xl text-gray-800 font-bold">
+                    <!-- Populated via JS -->
+                </p>
+            </div>
+
+            <!-- Sweet Custom Letter -->
+            <div class="bg-love-50/80 rounded-2xl p-5 border border-love-200 text-gray-700 text-sm leading-relaxed mb-6 text-left space-y-3 font-poppins">
+                <p class="font-fredoka font-bold text-love-700 text-base">Happy 14th monthsary, Loviee!</p>
+                
+                <p>
+                    I just want to remind you today kung gaano ako ka-thankful that I have you. Imagine, 14 months na pala tayo! Parang kailan lang nung nanliligaw pa lang ako, sobrang shy ko pa noon well, hanggang ngayon pa rin naman HAHAHA.
+                </p>
+                <p>
+                    Thank you so much for everything, Lovie. For understanding me, for your endless patience kapag may mga araw na sobrang drained or nakakapagod ako, and for being my partner-in-crime sa lahat ng bagay. Even the simplest moments yung random kwentuhan natin, asaran, or kahit tumambay lang tayo anywhere with nothing to do, titigan lang HAHAHA more than enough na yun for me because I'm with you. You really are my safe space and my calm whenever everything around me feels so chaotic or whenever I'm feeling totally exhausted.
+                </p>
+                <p>
+                    I also want you to know how much I appreciate all your effort, big or small. I see it and I truly feel it all. I'm really looking forward to all the milestones we'll conquer and enjoy together. Marami pa tayong kakainin, pupuntahan, and explore side by side.
+                </p>
+                <p>
+                    Always remember that I'm here for you, back-to-back no matter what happens. I got your back always, Lovie.
+                </p>
+                <p class="font-semibold text-love-600">
+                    I love you so much! Happy 14th monthsary, Lovieee! ❤️
+                </p>
+            </div>
+
+            <button onclick="restartSurprise()" class="text-xs text-love-500 hover:text-love-700 underline font-medium">
+                Want to pick another date option? Click here 🔄
+            </button>
+        </section>
+
+    </main>
+
+    <!-- JS Logic Script -->
+    <script>
+        // CONFIGURATION: Set your anniversary date here! (YYYY-MM-DD)
+        const TARGET_ANNIVERSARY_DATE = "2025-09-07"; 
+
+        // State variables
+        let selectedDateOption = "";
+        let noBtnClickCount = 0;
+
+        // Audio Effects (Synthesized using Web Audio API)
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        
+        function playTone(freq, type, duration) {
+            try {
+                if (audioCtx.state === 'suspended') {
+                    audioCtx.resume();
+                }
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                osc.type = type;
+                osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
+                gain.gain.setValueAtTime(0.1, audioCtx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + duration);
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+                osc.start();
+                osc.stop(audioCtx.currentTime + duration);
+            } catch(e) {}
+        }
+
+        function playSuccessSound() {
+            playTone(523.25, 'sine', 0.2); // C5
+            setTimeout(() => playTone(659.25, 'sine', 0.2), 100); // E5
+            setTimeout(() => playTone(783.99, 'sine', 0.4), 200); // G5
+        }
+
+        function playPopSound() {
+            playTone(400, 'triangle', 0.1);
+        }
+
+        function playErrorSound() {
+            playTone(200, 'sawtooth', 0.3);
+        }
+
+        // Generate Floating Hearts Background
+        function createHeartBackground() {
+            const container = document.getElementById('heart-container');
+            const heartEmojis = ['💖', '💕', '🌸', '✨', '💗', '❤️'];
+            
+            for (let i = 0; i < 20; i++) {
+                const heart = document.createElement('div');
+                heart.className = 'heart-particle';
+                heart.innerText = heartEmojis[Math.floor(Math.random() * heartEmojis.length)];
+                heart.style.left = `${Math.random() * 100}vw`;
+                heart.style.animationDuration = `${4 + Math.random() * 6}s`;
+                heart.style.animationDelay = `${Math.random() * 5}s`;
+                heart.style.fontSize = `${16 + Math.random() * 20}px`;
+                container.appendChild(heart);
+            }
+        }
+
+        // STEP 1: Enable / Disable button as user changes date
+        function checkDateInput() {
+            const inputDate = document.getElementById('anniversary-date').value;
+            const unlockBtn = document.getElementById('unlock-btn');
+            const btnText = document.getElementById('btn-text');
+            const btnIcon = document.getElementById('btn-icon');
+            const errorMsg = document.getElementById('error-msg');
+
+            if (inputDate === TARGET_ANNIVERSARY_DATE) {
+                errorMsg.classList.add('hidden');
+                unlockBtn.disabled = false;
+                unlockBtn.className = "w-full py-4 bg-gradient-to-r from-love-400 to-love-600 hover:from-love-500 hover:to-love-700 text-white font-fredoka text-xl rounded-2xl shadow-lg transform transition active:scale-95 flex items-center justify-center gap-2 cursor-pointer animate-bounce";
+                btnText.innerText = "CONFIRM DATE 💖";
+                btnIcon.innerText = "✨";
+            } else {
+                unlockBtn.disabled = true;
+                unlockBtn.className = "w-full py-4 bg-gray-300 text-gray-500 font-fredoka text-xl rounded-2xl shadow transition-all duration-300 cursor-not-allowed flex items-center justify-center gap-2";
+                btnText.innerText = "Confirm Date";
+                btnIcon.innerText = "🔒";
+
+                if (inputDate && inputDate !== TARGET_ANNIVERSARY_DATE) {
+                    errorMsg.innerText = "Oops! Wrong date Lovie 😅 Try again!";
+                    errorMsg.classList.remove('hidden');
+                } else {
+                    errorMsg.classList.add('hidden');
+                }
+            }
+        }
+
+        function verifyDate() {
+            const inputDate = document.getElementById('anniversary-date').value;
+            if (inputDate === TARGET_ANNIVERSARY_DATE) {
+                playSuccessSound();
+                
+                // Trigger Confetti Burst
+                confetti({
+                    particleCount: 60,
+                    spread: 70,
+                    origin: { y: 0.7 }
+                });
+
+                // Transition to Step 2
+                document.getElementById('step-1').classList.add('hidden');
+                document.getElementById('step-2').classList.remove('hidden');
+            }
+        }
+
+        // STEP 2: Evasive "NO" Button logic (Only teleports on CLICK)
+        function moveNoButton() {
+            const noBtn = document.getElementById('no-btn');
+            const yesBtn = document.getElementById('yes-btn');
+            const teaseText = document.getElementById('tease-text');
+            const container = document.getElementById('btn-container');
+
+            playPopSound();
+            noBtnClickCount++;
+
+            // Array of cheeky playful texts in English
+            const cheekyTexts = [
+                "You can't say No, Lovie! 😜",
+                "Try clicking again 😏",
+                "There's no other choice! Haha 🥰",
+                "Come on Lovie, click YES! 💖",
+                "Look at the button running away 🏃‍♂️💨"
+            ];
+
+            teaseText.innerText = cheekyTexts[Math.floor(Math.random() * cheekyTexts.length)];
+
+            // Grow the YES button
+            const currentScale = 1 + (noBtnClickCount * 0.15);
+            yesBtn.style.transform = `scale(${Math.min(currentScale, 1.6)})`;
+
+            // Teleport NO button within the container
+            const containerRect = container.getBoundingClientRect();
+            const btnRect = noBtn.getBoundingClientRect();
+
+            const maxX = Math.max(10, containerRect.width - btnRect.width - 20);
+            const maxY = Math.max(10, containerRect.height - btnRect.height - 20);
+
+            const randomX = Math.floor(Math.random() * maxX);
+            const randomY = Math.floor(Math.random() * maxY);
+
+            noBtn.style.position = 'absolute';
+            noBtn.style.left = `${randomX}px`;
+            noBtn.style.top = `${randomY}px`;
+        }
+
+        function acceptProposal() {
+            playSuccessSound();
+
+            // Big Celebration Confetti Burst
+            confetti({
+                particleCount: 100,
+                spread: 100,
+                origin: { y: 0.6 }
+            });
+
+            // Transition to Step 3
+            document.getElementById('step-2').classList.add('hidden');
+            document.getElementById('step-3').classList.remove('hidden');
+        }
+
+        // STEP 3: Date Option Selection
+        function selectOption(cardElement, optionName) {
+            playPopSound();
+            
+            // Remove 'selected' class from all cards
+            document.querySelectorAll('.date-card').forEach(card => {
+                card.classList.remove('selected');
+            });
+
+            // Add 'selected' class to clicked card
+            cardElement.classList.add('selected');
+            selectedDateOption = optionName;
+
+            // Enable Lock button
+            const lockBtn = document.getElementById('lock-date-btn');
+            lockBtn.disabled = false;
+            lockBtn.classList.remove('bg-gray-300', 'text-gray-500', 'cursor-not-allowed');
+            lockBtn.classList.add('bg-gradient-to-r', 'from-love-400', 'to-love-600', 'hover:from-love-500', 'hover:to-love-700', 'text-white', 'shadow-lg');
+        }
+
+        function showSummary() {
+            if (!selectedDateOption) return;
+
+            playSuccessSound();
+
+            // Show selected option text
+            document.getElementById('summary-choice').innerText = selectedDateOption;
+
+            // Confetti Fireworks Burst
+            const duration = 2 * 1000;
+            const end = Date.now() + duration;
+
+            (function frame() {
+                confetti({
+                    particleCount: 4,
+                    angle: 60,
+                    spread: 55,
+                    origin: { x: 0 }
+                });
+                confetti({
+                    particleCount: 4,
+                    angle: 120,
+                    spread: 55,
+                    origin: { x: 1 }
+                });
+
+                if (Date.now() < end) {
+                    requestAnimationFrame(frame);
+                }
+            })();
+
+            // Transition to Final Step 4
+            document.getElementById('step-3').classList.add('hidden');
+            document.getElementById('step-4').classList.remove('hidden');
+        }
+
+        function restartSurprise() {
+            selectedDateOption = "";
+            noBtnClickCount = 0;
+            
+            // Reset cards
+            document.querySelectorAll('.date-card').forEach(card => card.classList.remove('selected'));
+            
+            // Reset Yes Button scale
+            const yesBtn = document.getElementById('yes-btn');
+            yesBtn.style.transform = `scale(1)`;
+            
+            // Reset No button position
+            const noBtn = document.getElementById('no-btn');
+            noBtn.style.position = 'relative';
+            noBtn.style.left = 'auto';
+            noBtn.style.top = 'auto';
+
+            // Show Step 2 again
+            document.getElementById('step-4').classList.add('hidden');
+            document.getElementById('step-2').classList.remove('hidden');
+        }
+
+        // Initialize Background on Load
+        window.onload = function() {
+            createHeartBackground();
+        };
+    </script>
+</body>
+</html>
